@@ -1,6 +1,7 @@
 from sudoku import Sudoku, Difficulty
 from generator import Generator
 import threading
+import time
 
 import tkinter as tk
 from tkinter import ttk
@@ -18,16 +19,25 @@ def create_board(window, sudoku):
                 cell.insert(0, cell_value)
             else:
                 cell.insert(0, "")
+            cell.configure(state="disabled")
 
 def adjust_column_width(window, column_index):
     widgets = window.grid_slaves(column=column_index)
     max_width = max(widget.winfo_width() for widget in widgets)
     window.columnconfigure(column_index, minsize=max_width)
 
-def generate_threaded(window):
-    threading.Thread(target=generate, args=(window,)).start()
+def generate_threaded(window, button : ttk.Button, combobox : ttk.Combobox):
+    gen_thread = threading.Thread(target=generate, args=(window, button, combobox, Difficulty[combobox.get()]))
+    gen_thread.daemon = True
+    gen_thread.start()
 
-def generate(window):
+def generate(window, button : ttk.Button = None, combobox : ttk.Combobox = None, difficulty : Difficulty = Difficulty.MEDIUM):    
+    if button is not None:
+        button.configure(state="disabled", text="Generating...")
+        window.update()
+    if combobox is not None:
+        combobox.configure(state="disabled")
+        window.update()
     generator = Generator()
     sudoku : Sudoku = None
     try:
@@ -37,6 +47,12 @@ def generate(window):
         exit(1)
     sudoku.print_board()
     create_board(window, sudoku)
+    if button is not None:
+        button.configure(state="enabled", text="Generate")
+        window.update()
+    if combobox is not None:
+        combobox.configure(state="enabled")
+        window.update()
 
 
 if __name__ == "__main__":
@@ -53,8 +69,16 @@ if __name__ == "__main__":
 
     button_font = font.Font(family='Arial', size=20)
 
-    generate_button = ttk.Button(window, text="Generate",command=lambda: generate_threaded(window))
+    difficulty_combobox = ttk.Combobox(window, values=[Difficulty.EASY.name, Difficulty.MEDIUM.name, Difficulty.HARD.name, Difficulty.EXPERT.name])
+    difficulty_combobox.current(1)
+    difficulty_combobox.pack(in_=menu_frame, fill="x")
+
+    generate_button = ttk.Button(window, text="Generate",command=lambda: generate_threaded(window, generate_button, difficulty_combobox))
     generate_button.pack(in_=menu_frame, fill="x")
+
+    test_button = ttk.Button(window, text="Test",command=lambda: print(Difficulty[difficulty_combobox.get()].name))
+    test_button.pack(in_=menu_frame, fill="x")
+
     adjust_column_width(window, 0)
     window.grid_columnconfigure(1, weight=1)
     window.grid_rowconfigure(0, weight=1)
