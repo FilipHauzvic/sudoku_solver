@@ -23,7 +23,17 @@ def validate_entry(value):
     except ValueError:
         return False
 
+def read_board():
+    for i in range(9):
+        for j in range(9):
+            cell = cells[i][j]
+            cell.update()
+            cell_value = cell.get()
+            if len(cell_value) != 0:
+                main_sudoku.set_cell(i, j, int(cell_value))
+
 def create_board(window, sudoku, initialize_cells : bool = False):
+    main_sudoku.copy_board(sudoku)
     board_frame = tk.Frame(window)
     board_frame.grid(row = 0, column = 1)
     for i in range(9):
@@ -39,15 +49,6 @@ def create_board(window, sudoku, initialize_cells : bool = False):
                 cell.insert(0, "")
         if initialize_cells:
             cells.append(row)
-
-def read_board():
-    for i in range(9):
-        for j in range(9):
-            cell = cells[i][j]
-            cell_value = cell.get()
-            if len(cell_value) == 0:
-                cell_value = 0
-            main_sudoku.set_cell(i, j, int(cell_value))
 
 def adjust_column_width(window, column_index):
     widgets = window.grid_slaves(column=column_index)
@@ -74,7 +75,6 @@ def generate(window, button : ttk.Button = None, combobox : ttk.Combobox = None,
         print(e)
         exit(1)
     create_board(window, sudoku)
-    main_sudoku.copy_board(sudoku)
     if button is not None:
         button.configure(state="enabled", text="Generate")
         window.update()
@@ -83,7 +83,7 @@ def generate(window, button : ttk.Button = None, combobox : ttk.Combobox = None,
         window.update()
 
 def solve(window):
-    #read_board()
+    read_board()
     solver = Solver(main_sudoku)
     try:
         solved_sudoku = solver.solve()
@@ -91,7 +91,6 @@ def solve(window):
         print(e)
         return
     create_board(window, solved_sudoku, True)
-    main_sudoku.copy_board(solved_sudoku)
     window.update()
 
 if __name__ == "__main__":
@@ -118,9 +117,6 @@ if __name__ == "__main__":
 
     solve_button = ttk.Button(window, text="Solve",command=lambda: solve(window))
     solve_button.pack(in_=menu_frame, fill="x")
-
-    test_button = ttk.Button(window, text="Test",command=read_board)
-    test_button.pack(in_=menu_frame, fill="x")
 
     adjust_column_width(window, 0)
     window.grid_columnconfigure(1, weight=1)
