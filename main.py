@@ -8,6 +8,7 @@ from tkinter import ttk
 import tkinter.font as font
 
 main_sudoku = Sudoku()
+cells = []
 
 def validate_entry(value):
     if len(value) == 0:
@@ -21,18 +22,31 @@ def validate_entry(value):
     except ValueError:
         return False
 
-def create_board(window, sudoku):
+def create_board(window, sudoku, initialize_cells : bool = False):
     board_frame = tk.Frame(window)
     board_frame.grid(row = 0, column = 1)
     for i in range(9):
+        row = []
         for j in range(9):
             cell = tk.Entry(board_frame, width=2, justify="center", font=("Arial", 20), validate="key", validatecommand=validate_entry_command)
+            row.append(cell)
             cell.grid(row=i, column=j)
             cell_value = sudoku.get_cell(i, j)
             if cell_value != 0:
                 cell.insert(0, cell_value)
             else:
                 cell.insert(0, "")
+        if initialize_cells:
+            cells.append(row)
+
+def read_board():
+    for i in range(9):
+        for j in range(9):
+            cell = cells[i][j]
+            cell_value = cell.get()
+            if len(cell_value) == 0:
+                cell_value = 0
+            main_sudoku.set_cell(i, j, int(cell_value))
 
 def adjust_column_width(window, column_index):
     widgets = window.grid_slaves(column=column_index)
@@ -90,13 +104,13 @@ if __name__ == "__main__":
     generate_button = ttk.Button(window, text="Generate",command=lambda: generate_threaded(window, generate_button, difficulty_combobox))
     generate_button.pack(in_=menu_frame, fill="x")
 
-    test_button = ttk.Button(window, text="Test",command=lambda: print(Difficulty[difficulty_combobox.get()].name))
+    test_button = ttk.Button(window, text="Test",command=read_board)
     test_button.pack(in_=menu_frame, fill="x")
 
     adjust_column_width(window, 0)
     window.grid_columnconfigure(1, weight=1)
     window.grid_rowconfigure(0, weight=1)
 
-    create_board(window, main_sudoku)
+    create_board(window, main_sudoku, True)
 
     window.mainloop()
