@@ -1,5 +1,6 @@
 from sudoku import Sudoku, Difficulty
 from generator import Generator
+from solver import Solver
 import threading
 import time
 
@@ -72,8 +73,8 @@ def generate(window, button : ttk.Button = None, combobox : ttk.Combobox = None,
     except Exception as e:
         print(e)
         exit(1)
-    sudoku.print_board()
     create_board(window, sudoku)
+    main_sudoku.copy_board(sudoku)
     if button is not None:
         button.configure(state="enabled", text="Generate")
         window.update()
@@ -81,6 +82,17 @@ def generate(window, button : ttk.Button = None, combobox : ttk.Combobox = None,
         combobox.configure(state="enabled")
         window.update()
 
+def solve(window):
+    #read_board()
+    solver = Solver(main_sudoku)
+    try:
+        solved_sudoku = solver.solve()
+    except Exception as e:
+        print(e)
+        return
+    create_board(window, solved_sudoku, True)
+    main_sudoku.copy_board(solved_sudoku)
+    window.update()
 
 if __name__ == "__main__":
     window = tk.Tk()
@@ -103,6 +115,9 @@ if __name__ == "__main__":
 
     generate_button = ttk.Button(window, text="Generate",command=lambda: generate_threaded(window, generate_button, difficulty_combobox))
     generate_button.pack(in_=menu_frame, fill="x")
+
+    solve_button = ttk.Button(window, text="Solve",command=lambda: solve(window))
+    solve_button.pack(in_=menu_frame, fill="x")
 
     test_button = ttk.Button(window, text="Test",command=read_board)
     test_button.pack(in_=menu_frame, fill="x")

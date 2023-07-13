@@ -14,6 +14,8 @@ class Solver():
             # time.sleep(1)
             if current.is_solved():
                 return current
+            elif not current.can_solve():
+                break
             else:
                 self.expand(current)
         raise Exception("No solution found")

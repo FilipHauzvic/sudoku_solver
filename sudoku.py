@@ -64,39 +64,57 @@ class Sudoku():
             for j in range(9):
                 self.set_cell(i, j, board.get_cell(i, j))
 
-    def row_contains(self, row, value):
+    def row_duplicates(self, row):
+        values = set()
         for i in range(9):
-            if self.board[row][i] == value:
+            if self.board[row][i] == 0:
+                continue
+            if self.board[row][i] in values:
                 return True
+            values.add(self.board[row][i])
         return False
     
-    def col_contains(self, col, value):
+    def col_duplicates(self, col):
+        values = set()
         for i in range(9):
-            if self.board[i][col] == value:
+            if self.board[i][col] == 0:
+                continue
+            if self.board[i][col] in values:
                 return True
+            values.add(self.board[i][col])
         return False
     
-    def box_contains(self, row, col, value):
+    def box_duplicates(self, row, col):
+        values = set()
         start_row = row - row % 3
         start_col = col - col % 3
         for i in range(start_row, start_row + 3):
             for j in range(start_col, start_col + 3):
-                if self.board[i][j] == value:
+                if self.board[i][j] == 0:
+                    continue
+                if self.board[i][j] in values:
                     return True
+                values.add(self.board[i][j])
         return False
-    
+
     def is_valid(self):
         for i in range(9):
-            for j in range(9):
-                if self.get_cell(i, j) != 0:
-                    if self.row_contains(i, self.get_cell(i, j)) or self.col_contains(j, self.get_cell(i, j)) or self.box_contains(i, j, self.get_cell(i, j)):
-                        return False
+            if self.row_duplicates(i):
+                return False
+            if self.col_duplicates(i):
+                return False
+        for i in range(3):
+            for j in range(3):
+                if self.box_duplicates(i * 3, j * 3):
+                    return False
         return True
     
     def can_set(self, row, col, value):
         return value in self.valid_values[row][col]
 
     def can_solve(self):
+        if not self.is_valid():
+            return False
         for i in range(9):
             for j in range(9):
                 if self.get_cell(i, j) == 0:
