@@ -7,19 +7,32 @@ import tkinter as tk
 from tkinter import ttk
 import tkinter.font as font
 
+main_sudoku = Sudoku()
+
+def validate_entry(value):
+    if len(value) == 0:
+        return True
+    try:
+        int(value)
+        if len(value) > 1:
+            return False
+        else:
+            return True
+    except ValueError:
+        return False
+
 def create_board(window, sudoku):
     board_frame = tk.Frame(window)
     board_frame.grid(row = 0, column = 1)
     for i in range(9):
         for j in range(9):
-            cell = tk.Entry(board_frame, width=2, justify="center", font=("Arial", 20))
+            cell = tk.Entry(board_frame, width=2, justify="center", font=("Arial", 20), validate="key", validatecommand=validate_entry_command)
             cell.grid(row=i, column=j)
             cell_value = sudoku.get_cell(i, j)
             if cell_value != 0:
                 cell.insert(0, cell_value)
             else:
                 cell.insert(0, "")
-            cell.configure(state="disabled")
 
 def adjust_column_width(window, column_index):
     widgets = window.grid_slaves(column=column_index)
@@ -38,7 +51,7 @@ def generate(window, button : ttk.Button = None, combobox : ttk.Combobox = None,
     if combobox is not None:
         combobox.configure(state="disabled")
         window.update()
-    generator = Generator()
+    generator = Generator(difficulty)
     sudoku : Sudoku = None
     try:
         sudoku = generator.generate()
@@ -59,6 +72,7 @@ if __name__ == "__main__":
     window = tk.Tk()
     window.title("Sudoku")
     window.geometry("750x500")
+    validate_entry_command = (window.register(validate_entry), '%P')
 
     style = ttk.Style(window)
     window.tk.call('source', 'breeze-dark/breeze-dark.tcl')
@@ -82,5 +96,7 @@ if __name__ == "__main__":
     adjust_column_width(window, 0)
     window.grid_columnconfigure(1, weight=1)
     window.grid_rowconfigure(0, weight=1)
+
+    create_board(window, main_sudoku)
 
     window.mainloop()
