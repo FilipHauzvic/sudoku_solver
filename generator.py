@@ -4,37 +4,34 @@ import random
 import time
 
 class Generator():
-    def __init__(self, difficulty = Difficulty.EASY):
-        self.solver = Solver(Sudoku(difficulty))
-
-    def generate(self):
+    def generate(self, difficulty = Difficulty.EASY):
+        # Create a solution from an empty board
+        solver = Solver(Sudoku(difficulty))
         try:
-            solution : Sudoku = self.solver.solve()
+            solution : Sudoku = solver.solve()
         except:
             raise Exception("Failed to generate a solution")
-        # solution.print_board()
-        # print("-----------------")
+        
         clues = 0
-        if solution.difficulty == Difficulty.EASY:
+        if difficulty == Difficulty.EASY:
             clues = random.randint(32, 45)
-        elif solution.difficulty == Difficulty.MEDIUM:
+        elif difficulty == Difficulty.MEDIUM:
             clues = random.randint(26, 31)
-        elif solution.difficulty == Difficulty.HARD:
+        elif difficulty == Difficulty.HARD:
             clues = random.randint(22, 25)
-        elif solution.difficulty == Difficulty.EXPERT:
+        elif difficulty == Difficulty.EXPERT:
             clues = random.randint(17, 21)
         else:
             raise Exception("Invalid difficulty")
-        
-        while solution.get_number_of_clues() > clues:
+
+        for _ in range(81 - clues):
+            # Get random cell that is not empty
             row = random.randint(0, 8)
             col = random.randint(0, 8)
-            if solution.get_cell(row, col) != 0:
-                old_value = solution.get_cell(row, col)
-                solution.set_cell(row, col, 0)
-                tmp_solver = Solver(solution)
-                if not tmp_solver.has_only_one_solution():
-                    solution.set_cell(row, col, old_value)
+            while solution.get_cell(row, col) == 0:
+                row = random.randint(0, 8)
+                col = random.randint(0, 8)
 
-        # solution.print_board()
+            solution.set_cell(row, col, 0)
+        
         return solution                

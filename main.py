@@ -78,10 +78,10 @@ def generate(window, button : ttk.Button = None, combobox : ttk.Combobox = None,
     if combobox is not None:
         combobox.configure(state="disabled")
         window.update()
-    generator = Generator(difficulty)
+    generator = Generator()
     sudoku : Sudoku = None
     try:
-        sudoku = generator.generate()
+        sudoku = generator.generate(difficulty)
     except Exception as e:
         print(e)
         exit(1)
