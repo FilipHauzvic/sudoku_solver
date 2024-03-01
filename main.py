@@ -50,6 +50,17 @@ def create_board(window, sudoku, initialize_cells : bool = False):
         if initialize_cells:
             cells.append(row)
 
+def set_board(sudoku):
+    for i in range(9):
+        for j in range(9):
+            cell = cells[i][j]
+            cell.delete(0, "end")
+            cell_value = sudoku.get_cell(i, j)
+            if cell_value != 0:
+                cell.insert(0, cell_value)
+            else:
+                cell.insert(0, "")
+
 def adjust_column_width(window, column_index):
     widgets = window.grid_slaves(column=column_index)
     max_width = max(widget.winfo_width() for widget in widgets)
@@ -74,7 +85,7 @@ def generate(window, button : ttk.Button = None, combobox : ttk.Combobox = None,
     except Exception as e:
         print(e)
         exit(1)
-    create_board(window, sudoku)
+    set_board(sudoku)
     if button is not None:
         button.configure(state="enabled", text="Generate")
         window.update()
@@ -90,7 +101,7 @@ def solve(window):
     except Exception as e:
         print(e)
         return
-    create_board(window, solved_sudoku, True)
+    set_board(solved_sudoku)
     window.update()
 
 if __name__ == "__main__":
@@ -117,6 +128,9 @@ if __name__ == "__main__":
 
     solve_button = ttk.Button(window, text="Solve",command=lambda: solve(window))
     solve_button.pack(in_=menu_frame, fill="x")
+
+    clear_button = ttk.Button(window, text="Clear",command=lambda: set_board(Sudoku()))
+    clear_button.pack(in_=menu_frame, fill="x")
 
     adjust_column_width(window, 0)
     window.grid_columnconfigure(1, weight=1)
